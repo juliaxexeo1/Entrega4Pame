@@ -6,7 +6,8 @@ from flask import request,jsonify,render_template
 from flask.views import MethodView
 from app.extensions import db, mail
 from flask_mail import Message
- 
+import bcrypt
+
 class ClienteCreate(MethodView):#'/cliente/create'
     def get(self):
         cliente = Cliente.query.all()
@@ -20,19 +21,36 @@ class ClienteCreate(MethodView):#'/cliente/create'
         cpf = dados.get('cpf')
         endereco = dados.get('endereco')
         email = dados.get('email')
+        senha = dados.get('senha')
 
         #validação de dados
         if not isinstance(nome,str): 
-            return{'error':'nome invalido'}
+            return{'error':'nome invalido'},400
         elif not isinstance (cpf,int):
-            return{'error':'cpf invalido'}
+            return{'error':'cpf invalido'},400
         elif not isinstance(endereco,str):
-            return{'error':'endereco invalido'}
-
+            return{'error':'endereco invalido'},400
         elif not isinstance (email,str):
-            return{'error':'email invalido'}
+            return{'error':'email invalido'},400
         
-        cliente = Cliente(nome=nome,cpf=cpf,endereco=endereco,email=email)
+        cliente = Cliente.query.filter_by(email = email).first()
+
+        if cliente:
+            return {'error':'Email já cadastrado'},400
+
+#cliente = Cliente.query.filter_by(cpf = cpf).first()
+
+        #if cliente:
+            #return {'error':'CPF já cadastrado'},400
+
+
+
+
+
+
+        senha_hash = bcrypt.hashpw(senha.encode(),bcrypt.gensalt())
+
+        cliente = Cliente(nome=nome,cpf=cpf,endereco=endereco,email=email,senha_hash=senha_hash)
         db.session.add(cliente)
         db.session.commit()
 
@@ -66,13 +84,13 @@ class ClientesDetails(MethodView):#'/cliente/details/<int:id>'
 
          #validação de dados
         if not isinstance(nome,str): 
-            return{'error':'nome invalido'}
+            return{'error':'nome invalido'},400
         elif not isinstance (cpf,int):
-            return{'error':'cpf invalido'}
+            return{'error':'cpf invalido'},400
         elif not isinstance(endereco,str):
-            return{'error':'endereco invalido'}
+            return{'error':'endereco invalido'},400
         elif not isinstance (email,str):
-            return{'error':'email invalido'}
+            return{'error':'email invalido'},400
 
         cliente.nome = nome
         cliente.cpf = cpf
@@ -96,13 +114,13 @@ class ClientesDetails(MethodView):#'/cliente/details/<int:id>'
 
          #validação de dados
         if not isinstance(nome,str): 
-            return{'error':'nome invalido'}
+            return{'error':'nome invalido'},400
         elif not isinstance (cpf,int):
-            return{'error':'cpf invalido'}
+            return{'error':'cpf invalido'},400
         elif not isinstance(endereco,str):
-            return{'error':'endereco invalido'}
+            return{'error':'endereco invalido'},400
         elif not isinstance (email,str):
-            return{'error':'email invalido'}
+            return{'error':'email invalido'},400
 
         cliente.nome = nome
         cliente.cpf = cpf
@@ -121,4 +139,4 @@ class ClientesDetails(MethodView):#'/cliente/details/<int:id>'
         return cliente.json(),200
 
 
-
+'''class ClienteLogin(MethodView):'''
