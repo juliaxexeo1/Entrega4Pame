@@ -6,9 +6,14 @@ from flask import request,jsonify,render_template
 from flask.views import MethodView
 from app.extensions import db, mail
 from flask_mail import Message
+from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
+
+
 import bcrypt
 
 class ClienteCreate(MethodView):#'/cliente/create'
+    
+
     def get(self):
         cliente = Cliente.query.all()
         return jsonify ([cliente.json()for cliente in cliente]),200
@@ -38,10 +43,10 @@ class ClienteCreate(MethodView):#'/cliente/create'
         if cliente:
             return {'error':'Email já cadastrado'},400
 
-#cliente = Cliente.query.filter_by(cpf = cpf).first()
+        cliente = Cliente.query.filter_by(cpf = cpf).first()
 
-        #if cliente:
-            #return {'error':'CPF já cadastrado'},400
+        if cliente:
+            return {'error':'CPF já cadastrado'},400
 
 
 
@@ -66,13 +71,22 @@ class ClienteCreate(MethodView):#'/cliente/create'
         return cliente.json(),200
 
 class ClientesDetails(MethodView):#'/cliente/details/<int:id>'
+
+    decorators = [jwt_required()]
    
     def get (self,id):
+
+        if (get_jwt_identity() != id):
+            return{'error':'Usuário não permitido '},400
+        
         cliente = Cliente.query.get_or_404(id)
         return cliente.json(),200
     
-#fazer validação de dados
+ 
     def put (self,id):
+        if (get_jwt_identity() != id):
+            return{'error':'Usuário não permitido '},400
+
         cliente = Cliente.query.get_or_404(id)
         dados = request.json
 
@@ -91,6 +105,11 @@ class ClientesDetails(MethodView):#'/cliente/details/<int:id>'
             return{'error':'endereco invalido'},400
         elif not isinstance (email,str):
             return{'error':'email invalido'},400
+    
+        cliente = Cliente.query.filter_by(email = email).first()
+
+   
+        
 
         cliente.nome = nome
         cliente.cpf = cpf
@@ -102,8 +121,12 @@ class ClientesDetails(MethodView):#'/cliente/details/<int:id>'
 
         return cliente.json(),200
     
-#fazer validação de dados
+
     def patch(self,id):
+
+        if (get_jwt_identity() != id):
+            return{'error':'Usuário não permitido '},400
+
         cliente = Cliente.query.get_or_404(id)
         dados = request.json
 
@@ -122,6 +145,10 @@ class ClientesDetails(MethodView):#'/cliente/details/<int:id>'
         elif not isinstance (email,str):
             return{'error':'email invalido'},400
 
+        cliente = Cliente.query.filter_by(email = email).first()
+
+       
+
         cliente.nome = nome
         cliente.cpf = cpf
         cliente.endereco = endereco
@@ -132,11 +159,31 @@ class ClientesDetails(MethodView):#'/cliente/details/<int:id>'
 
         return cliente.json(),200
 
+
+
     def delete(self,id):
+        if (get_jwt_identity() != id):
+            return{'error':'Usuário não permitido '},400
         cliente = Cliente.query.get_or_404(id)
         db.session.delete(cliente)
         db.session.commit()
         return cliente.json(),200
 
 
-'''class ClienteLogin(MethodView):'''
+class ClienteLogin(MethodView):
+    def post(self):
+        dados = request.json
+
+           
+        email = dados.get('email')
+        senha = dados.get('senha')
+
+        cliente=Cliente.query.filter_by(email = email).first()
+        if (not cliente) or (not bcrypt.checkpw (senha.encode(), cliente.senha_hash)): 
+            return{'error':'email ou senha invalidos'},400
+        
+        token = create_access_token(identity = cliente.id)
+        return {"token":token},200
+
+
+
