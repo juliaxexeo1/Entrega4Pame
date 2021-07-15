@@ -9,6 +9,7 @@ class Cliente(db.Model):
     cpf=db.Column(db.Integer,nullable=False, unique=True)
     endereco=db.Column(db.String(100),nullable=False)
     email=db.Column(db.String(100),nullable=False, unique=True)
+    senha_hash = db.Column(db.String(300),nullable=False)
 
     produto=db.relationship('Produto',backref='cliente')
 
