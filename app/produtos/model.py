@@ -4,7 +4,7 @@ class Produto(db.Model):
     __tablename__='produto'
     id=db.Column(db.Integer, primary_key=True)
     tipo_de_produto=db.Column(db.String(100),nullable=False)
-    marca=db.Column(db.String(100),nullable=True)
+    marca=db.Column(db.String(100),nullable=False)
     quantidade=db.Column(db.Integer,nullable=False)
     preco=db.Column(db.Integer,nullable=False)
 

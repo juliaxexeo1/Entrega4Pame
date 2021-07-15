@@ -19,11 +19,11 @@ class ProdutoCreate(MethodView):#/produto/create
 
         #validação de dados:
         if not isinstance(tipo_de_produto,str):
-            return{'error':'tipo invalido'} 
+            return{'error':'tipo invalido'} ,400
         elif not isinstance(marca,str):
-            return{'error':'marca invalida'} 
+            return{'error':'marca invalida'} ,400
         elif not isinstance (quantidade,int):
-            return{'error':'quantidade invalida'}
+            return{'error':'quantidade invalida'},400
         elif not isinstance (preco,int):
             return{'error':'preco invalida'}
        
@@ -52,13 +52,13 @@ class ProdutoDetails(MethodView): #'/produto/details/<int:id>'
         
         #validação de dados:
         if not isinstance(tipo_de_produto,str):
-            return{'error':'tipo invalido'}  
+            return{'error':'tipo invalido'},400
         elif not isinstance(marca,str):
-            return{'error':'marca invalida'}
+            return{'error':'marca invalida'},400
         elif not isinstance (quantidade,int):
-            return{'error':'quantidade invalida'}
+            return{'error':'quantidade invalida'},400
         elif not isinstance (preco,int):
-            return{'error':'preco invalida'}
+            return{'error':'preco invalida'},400
        
 
         produto.tipo_de_produto=tipo_de_produto
@@ -85,13 +85,13 @@ class ProdutoDetails(MethodView): #'/produto/details/<int:id>'
         
         #validação de dados:
         if not isinstance(tipo_de_produto,str):
-            return{'error':'tipo invalido'}  
+            return{'error':'tipo invalido'},400
         elif not isinstance(marca,str):
-            return{'error':'marca invalida'}
+            return{'error':'marca invalida'},400
         elif not isinstance (quantidade,int):
-            return{'error':'quantidade invalida'}
+            return{'error':'quantidade invalida'},400
         elif not isinstance (preco,int):
-            return{'error':'preco invalida'}
+            return{'error':'preco invalida'},400
        
 
         produto.tipo_de_produto=tipo_de_produto
