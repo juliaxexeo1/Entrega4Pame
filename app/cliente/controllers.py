@@ -7,6 +7,7 @@ from flask.views import MethodView
 from app.extensions import db, mail
 from flask_mail import Message
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
+from app.cliente.utils import testa_email, testa_cpf
 
 
 import bcrypt
@@ -31,11 +32,11 @@ class ClienteCreate(MethodView):#'/cliente/create'
         #validação de dados
         if not isinstance(nome,str): 
             return{'error':'nome invalido'},400
-        elif not isinstance (cpf,int):
+        elif not testa_cpf(cpf):
             return{'error':'cpf invalido'},400
         elif not isinstance(endereco,str):
             return{'error':'endereco invalido'},400
-        elif not isinstance (email,str):
+        elif not testa_email (email):
             return{'error':'email invalido'},400
         
         cliente = Cliente.query.filter_by(email = email).first()
@@ -94,28 +95,31 @@ class ClientesDetails(MethodView):#'/cliente/details/<int:id>'
         cpf = dados.get('cpf')
         endereco = dados.get('endereco')
         email = dados.get('email')
+        senha = dados.get('senha')
+
+       
+
 
 
          #validação de dados
         if not isinstance(nome,str): 
             return{'error':'nome invalido'},400
-        elif not isinstance (cpf,int):
+        elif not  testa_cpf(cpf):
             return{'error':'cpf invalido'},400
         elif not isinstance(endereco,str):
             return{'error':'endereco invalido'},400
-        elif not isinstance (email,str):
+        elif not testa_email (email):
             return{'error':'email invalido'},400
-    
-        cliente = Cliente.query.filter_by(email = email).first()
 
-   
+
+        senha_hash = bcrypt.hashpw(senha.encode(),bcrypt.gensalt())
         
 
         cliente.nome = nome
         cliente.cpf = cpf
         cliente.endereco = endereco
         cliente.email = email
-       
+        cliente.senha_hash = senha_hash
 
         db.session.commit()
 
@@ -134,25 +138,35 @@ class ClientesDetails(MethodView):#'/cliente/details/<int:id>'
         cpf = dados.get('cpf',cliente.cpf)
         endereco = dados.get('endereco',cliente.endereco)
         email = dados.get('email',cliente.email)
+        senha = dados.get('senha',cliente.senha_hash)
+        
 
-         #validação de dados
+
+      
+
         if not isinstance(nome,str): 
             return{'error':'nome invalido'},400
-        elif not isinstance (cpf,int):
+        elif not testa_cpf(cpf):
             return{'error':'cpf invalido'},400
         elif not isinstance(endereco,str):
             return{'error':'endereco invalido'},400
-        elif not isinstance (email,str):
+        elif not testa_email (email):
             return{'error':'email invalido'},400
+        
+        if  isinstance(senha,str):
+            senha_hash = bcrypt.hashpw(senha.encode(),bcrypt.gensalt())
+        else:
+            senha_hash = senha
 
-        cliente = Cliente.query.filter_by(email = email).first()
 
+     
        
 
         cliente.nome = nome
         cliente.cpf = cpf
         cliente.endereco = endereco
         cliente.email = email
+        cliente.senha_hash = senha_hash
        
 
         db.session.commit()
